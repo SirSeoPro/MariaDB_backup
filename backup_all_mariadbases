@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Backup directory
+BACKUP_DIR="/mnt/backup_disk/teampass_backups"
+DATE=$(date +%Y-%m-%d)
+BACKUP_FILE="$BACKUP_DIR/all_databases_backup_$DATE.sql"
+LOG_FILE="$BACKUP_DIR/backup_log.txt"
+
+# Create directory
+mkdir -p "$BACKUP_DIR"
+chmod 777 "$BACKUP_DIR"
+
+# Start log
+echo "[$(date)] START: mysqldump --all-databases" >> "$LOG_FILE"
+
+# Dump ALL databases (password from /root/.my.cnf)
+mysqldump --all-databases --single-transaction > "$BACKUP_FILE" 2>> "$LOG_FILE"
+
+# Check and log
+if [ -f "$BACKUP_FILE" ] && [ -s "$BACKUP_FILE" ]; then
+    SIZE=$(du -h "$BACKUP_FILE" | cut -f1)
+    echo "[$(date)] SUCCESS: All databases backup created: $BACKUP_FILE (size: $SIZE)" >> "$LOG_FILE"
+    chmod 666 "$BACKUP_FILE"
+else
+    echo "[$(date)] ERROR: Backup failed! See mysqldump errors above." >> "$LOG_FILE"
+fi
+chmod 666 "$LOG_FILE"
+
+# Delete backups older than 14 days
+find "$BACKUP_DIR" -name "all_databases_backup_*.sql" -mtime +14 -delete

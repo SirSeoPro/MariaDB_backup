@@ -1,8 +1,10 @@
 #!/bin/bash
 
-BACKUP_DIR="/var/backups/teampass"
+BACKUP_DIR="/mnt/backup_disk/teampass_backups"
 DATE=$(date +%Y-%m-%d)
 DB_NAME="teampass"
+mkdir -p "$BACKUP_DIR"
+chmod 777 "$BACKUP_DIR"
 BACKUP_FILE="$BACKUP_DIR/teampass_backup_$DATE.sql"
 LOG_FILE="$BACKUP_DIR/backup_log.txt"
 
@@ -27,3 +29,4 @@ chmod 666 "$LOG_FILE"
 
 # Delete old backups (older than 14 days)
 find "$BACKUP_DIR" -name "teampass_backup_*.sql" -mtime +14 -delete
+
